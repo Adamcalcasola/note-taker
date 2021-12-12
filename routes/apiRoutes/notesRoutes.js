@@ -1,36 +1,31 @@
 const router = require('express').Router();
-const path = require('path');
+//const path = require('path');
 const {v4: uuid} = require('uuid');
 const fs = require('fs');
 //const {Store} = require('../../db/store');
-const notes = require('../../db/db.json');
+let notes = require('../../db/db.json');
 
-router.get('/notes', (req, res) => res.json(notes));
-
-router.get('/notes/:id', (req, res) => {
-    const note = notes.find(c => c.id === parseInt(req.params.id));
-    if (!note) res.status(404).send('note not found');
-    res.send(note);
-});
+router.get('/notes', (req, res) => {
+    res.json(notes)});
 
 router.post('/notes', (req, res) => {
     const {title, text} = req.body;
-    if (title || text) {
+    if (title && text) {
         const newNote = {
             title,
             text,
-            note_id: uuid(),
+            id: uuid(),
         };
 
     fs.readFile('./db/db.json', 'utf8', (err, data) => {
         if (err) {
           console.error(err);
         } else {
-          const parsedNotes = JSON.parse(data);
-          parsedNotes.push(newNote);
+          const savedNotes = JSON.parse(data);
+          savedNotes.push(newNote);
           fs.writeFile(
             './db/db.json',
-            JSON.stringify(parsedNotes, null, 4),
+            JSON.stringify(savedNotes, null, 4),
             (writeErr) =>
               writeErr
                 ? console.error(writeErr)
@@ -39,17 +34,20 @@ router.post('/notes', (req, res) => {
         }
       });
   
-      const response = {
-        status: 'success',
-        body: newNote,
-      };
-  
-      console.log(response);
-      res.json(response);
-      return response;
+    //   const response = {
+    //     status: 'success',
+    //     body: newNote,
+    //   };
+      //notes = require('./db/db.json');
+    //   console.log(newNote);
+      res.json(newNote);
     } else {
       res.json('Error in posting note');
     }
-  });
+});
+
+router.delete('/notes/:id', (req, res) => {
+
+})
 
 module.exports = router;

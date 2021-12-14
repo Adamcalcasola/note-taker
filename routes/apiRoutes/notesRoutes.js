@@ -1,9 +1,18 @@
 const router = require('express').Router();
 const {v4: uuid} = require('uuid');
 const fs = require('fs');
-const notes = require('../../public/db/db.json');
+const notes = require('../../db/db.json');
 
-router.get('/notes', (req, res) => res.json(notes));
+router.get('/notes', (req, res) => {
+  fs.readFile('./db/db.json', (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      let savedNotes = JSON.parse(data);
+      res.json(savedNotes);
+    }
+  });
+});
 
 router.post('/notes', (req, res) => {
     const {title, text} = req.body;
@@ -14,14 +23,14 @@ router.post('/notes', (req, res) => {
             id: uuid(),
         };
 
-    fs.readFile('./public/db/db.json', 'utf8', (err, data) => {
+    fs.readFile('./db/db.json', 'utf8', (err, data) => {
         if (err) {
           console.error(err);
         } else {
-          const savedNotes = JSON.parse(data);
+          let savedNotes = JSON.parse(data);
           savedNotes.push(newNote);
           fs.writeFile(
-            './public/db/db.json',
+            './db/db.json',
             JSON.stringify(savedNotes, null, 4),
             (writeErr) =>
               writeErr

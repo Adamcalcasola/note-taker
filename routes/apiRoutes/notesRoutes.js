@@ -1,12 +1,11 @@
 const router = require('express').Router();
 const {v4: uuid} = require('uuid');
 const fs = require('fs');
-const notes = require('../../db/db.json');
 
 router.get('/notes', (req, res) => {
   fs.readFile('./db/db.json', (err, data) => {
     if (err) {
-      console.log(err);
+      console.error(err);
     } else {
       let savedNotes = JSON.parse(data);
       res.json(savedNotes);
@@ -46,7 +45,27 @@ router.post('/notes', (req, res) => {
 });
 
 router.delete('/notes/:id', (req, res) => {
-
+  fs.readFile('./db/db.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+    } else {
+      let savedNotes = JSON.parse(data);
+      const lessNotes = savedNotes.filter(note => {
+        if (note.id !== req.params.id) {
+          return note;
+        }
+      });
+      fs.writeFile(
+        './db/db.json',
+        JSON.stringify(lessNotes, null, 4),
+        (writeErr) =>
+          writeErr
+            ? console.error(writeErr)
+            : console.info('Successfully updated notes!')
+      );
+    }
+  });
+  res.json();
 });
 
 module.exports = router;
